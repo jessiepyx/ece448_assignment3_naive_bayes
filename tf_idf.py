@@ -20,7 +20,6 @@ from collections import Counter
 import time
 
 
-
 def compute_tf_idf(train_set, train_labels, dev_set):
     """
     train_set - List of list of words corresponding with each movie review
@@ -37,12 +36,18 @@ def compute_tf_idf(train_set, train_labels, dev_set):
     Return: A list containing words with the highest tf-idf value from the dev_set documents
             Returned list should have same size as dev_set (one word from each dev_set document)
     """
+    cnt_docs = Counter()
+    cnt_docs_total = len(train_set)
+    for file in train_set:
+        for word in set(file):
+            cnt_docs[word] += 1
 
+    highest_tf_idf = []
+    for file in dev_set:
+        cnt_words_total = len(file)
+        tf_idf = dict()
+        for word in set(file):
+            tf_idf[word] = file.count(word) / cnt_words_total * math.log(cnt_docs_total / (1 + cnt_docs[word]))
+        highest_tf_idf.append(max(tf_idf, key=lambda x: tf_idf[x]))
 
-
-    # TODO: Write your code here
-    
-
-
-    # return list of words (should return a list, not numpy array or similar)
-    return []
+    return highest_tf_idf

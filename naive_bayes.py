@@ -36,12 +36,44 @@ def naiveBayes(train_set, train_labels, dev_set, smoothing_parameter, pos_prior)
 
     pos_prior - positive prior probability (between 0 and 1)
     """
+    cnt_pos = Counter()
+    cnt_neg = Counter()
+    log_likelihood_pos = dict()
+    log_likelihood_neg = dict()
+    for ind, file in enumerate(train_set):
+        if train_labels[ind] == 1:
+            for word in file:
+                cnt_pos[word] += 1
+                cnt_neg[word] += 0
+        else:
+            for word in file:
+                cnt_neg[word] += 1
+                cnt_pos[word] += 0
+    for file in dev_set:
+        for word in file:
+            cnt_pos[word] += 0
+            cnt_neg[word] += 0
+    unique_pos = len(list(cnt_pos))
+    unique_neg = len(list(cnt_neg))
+    cnt_pos_total = sum(cnt_pos.values())
+    cnt_neg_total = sum(cnt_neg.values())
+    for word in list(cnt_pos):
+        log_likelihood_pos[word] = math.log(float(cnt_pos[word] + smoothing_parameter) / (
+                smoothing_parameter * unique_pos + cnt_pos_total))
+        log_likelihood_neg[word] = math.log(float(cnt_neg[word] + smoothing_parameter) / (
+                smoothing_parameter * unique_neg + cnt_neg_total))
 
+    neg_prior = 1 - pos_prior
+    dev_labels = []
+    for file in dev_set:
+        log_pos_posterior = math.log(pos_prior)
+        log_neg_posterior = math.log(neg_prior)
+        for word in file:
+            log_pos_posterior += log_likelihood_pos[word]
+            log_neg_posterior += log_likelihood_neg[word]
+        if log_pos_posterior > log_neg_posterior:
+            dev_labels.append(1)
+        else:
+            dev_labels.append(0)
 
-
-    # TODO: Write your code here
-    
-
-
-    # return predicted labels of development set (make sure it's a list, not a numpy array or similar)
-    return []
+    return dev_labels
